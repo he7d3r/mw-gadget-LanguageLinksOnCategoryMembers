@@ -10,6 +10,9 @@
 
 	function addLanguageLinks( data ) {
 		var map = {};
+		if ( !data.query ) {
+			return;
+		}
 		$.each( data.query.pages, function ( i ) {
 			if ( data.query.pages[ i ].langlinks ) {
 				map[ data.query.pages[ i ].title ] = data.query.pages[ i ].langlinks[0]['*'];
