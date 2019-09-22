@@ -8,6 +8,21 @@
 
 	var langCode = 'pt';
 
+	function addLanguageLink( $existing, langCode, title ) {
+		$existing
+			.before( '[' )
+			.before(
+				$( '<a></a>' ).attr( {
+					title: title,
+					href: '//' + langCode + '.wikipedia.org/wiki/' +
+						mw.util.rawurlencode( title ),
+					lang: langCode,
+					hreflang: langCode
+				} ).text( langCode )
+			)
+			.before( '] ' );
+	}
+
 	function addLanguageLinks( data ) {
 		var map = {};
 		if ( !data.query ) {
@@ -22,18 +37,7 @@
 			var $this = $(this),
 				title = $this.text();
 			if ( map[ title ] ) {
-				$this
-					.before( '[' )
-					.before(
-						$( '<a></a>' ).attr( {
-							title: map[ title ],
-							href: '//' + langCode + '.wikipedia.org/wiki/' +
-								mw.util.rawurlencode( map[ title ] ),
-							lang: langCode,
-							hreflang: langCode
-						} ).text( langCode )
-					)
-					.before( '] ' );
+				addLanguageLink( $this, langCode, map[ title ] );
 			}
 		});
 	}
