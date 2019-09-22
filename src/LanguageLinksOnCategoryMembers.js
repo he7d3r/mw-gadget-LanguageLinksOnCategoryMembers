@@ -51,9 +51,11 @@
 	}
 
 	if ( mw.config.get( 'wgNamespaceNumber' ) === 14 && mw.config.get( 'wgAction' ) === 'view' && mw.config.get( 'wgContentLanguage' ) !== langCode ) {
-		mw.loader.using( [ 'mediawiki.api', 'mediawiki.util' ], function () {
-			$( getCategoryMembers );
-		} );
+		$.when(
+			mw.loader.using( [ 'mediawiki.api', 'mediawiki.util' ] ),
+			$.ready
+		)
+		.then( getCategoryMembers );
 	}
 
 }( mediaWiki, jQuery ) );
