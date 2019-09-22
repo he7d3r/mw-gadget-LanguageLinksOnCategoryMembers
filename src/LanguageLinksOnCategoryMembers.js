@@ -6,7 +6,8 @@
 ( function ( mw, $ ) {
 	'use strict';
 
-	var langCode = 'pt';
+	var langCode = 'pt',
+		init;
 
 	function addLanguageLink( $existing, langCode, title ) {
 		$existing
@@ -23,7 +24,7 @@
 			.before( '] ' );
 	}
 
-	function addLanguageLinks( data ) {
+	function getArticlesLinksFromPage( data ) {
 		var map = {};
 		if ( !data.query ) {
 			return;
@@ -33,7 +34,7 @@
 				map[ data.query.pages[ i ].title ] = data.query.pages[ i ].langlinks[0]['*'];
 			}
 		} );
-		$( '#mw-pages' ).find( 'a' ).each(function () {
+		$( '#mw-content-text' ).find( 'li > a' ).each(function () {
 			var $this = $(this),
 				title = $this.text();
 			if ( map[ title ] ) {
@@ -51,15 +52,36 @@
 			gcmtitle: mw.config.get( 'wgPageName' ),
 			gcmlimit: 500
 		} )
-		.done( addLanguageLinks );
+		.done( getArticlesLinksFromPage );
+	}
+	function getWhatLinksHere() {
+		var api = new mw.Api();
+		api.get( {
+			action: 'query',
+			format: 'json',
+			prop: 'langlinks',
+			titles: mw.config.get( 'wgRelevantPageName' ),
+			generator: 'linkshere',
+			lllang: langCode,
+			glhlimit: 500
+		} )
+		.done( getArticlesLinksFromPage );
 	}
 
-	if ( mw.config.get( 'wgNamespaceNumber' ) === 14 && mw.config.get( 'wgAction' ) === 'view' && mw.config.get( 'wgContentLanguage' ) !== langCode ) {
+	if (
+		mw.config.get( 'wgAction' ) === 'view' &&
+		mw.config.get( 'wgContentLanguage' ) !== langCode
+	) {
+		if ( mw.config.get( 'wgNamespaceNumber' ) === 14 ) {
+			init = getCategoryMembers;
+		} else if ( mw.config.get( 'wgCanonicalSpecialPageName' ) === 'Whatlinkshere' ) {
+			init = getWhatLinksHere;
+		}
 		$.when(
 			mw.loader.using( [ 'mediawiki.api', 'mediawiki.util' ] ),
 			$.ready
 		)
-		.then( getCategoryMembers );
+		.then( init );
 	}
 
 }( mediaWiki, jQuery ) );
